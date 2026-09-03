@@ -156,6 +156,38 @@ export function defaultTextStyle(): TextStyle {
 }
 
 /**
+ * The horizontal centre of a text block after the alignment origin shift.
+ *
+ * The offset places the *alignment edge* of the block — left edge for "left",
+ * right edge for "right", centre for "center" — at `frameWidth / 2 + offsetX
+ * * frameWidth`. This function returns where the block's centre ends up, so
+ * the plate and text rendering still draw symmetrically about that centre.
+ *
+ * Shared by Preview.tsx (via a CSS `calc()` equivalent) and rasterize.ts, so
+ * the preview and the export agree on where titles land.
+ */
+export function alignedCenterX(
+  align: TextStyle["align"],
+  offsetX: number,
+  frameWidth: number,
+  blockWidth: number,
+): number {
+  const anchor = frameWidth / 2 + offsetX * frameWidth;
+  switch (align) {
+    case "left":
+      return anchor + blockWidth / 2;
+    case "right":
+      return anchor - blockWidth / 2;
+    case "center":
+      return anchor;
+    default: {
+      const _exhaustive: never = align;
+      return _exhaustive;
+    }
+  }
+}
+
+/**
  * The CSS for one text clip, given the height of the surface it is drawn on.
  *
  * Shared by the preview overlay and the export rasteriser, so a title cannot

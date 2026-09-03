@@ -1395,6 +1395,12 @@ function TextOverlayBox({
     );
   };
 
+  // The alignment-dependent horizontal shift: the translate percentage is
+  // relative to the block's own width, so 50% shifts the anchor from the
+  // block's centre to its left edge, -50% to its right edge. This makes
+  // typed text grow from the chosen edge rather than symmetrically.
+  const alignShift = overlay.style.align === "left" ? "50%" : overlay.style.align === "right" ? "-50%" : "0px";
+
   return (
     <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
       <div
@@ -1402,11 +1408,10 @@ function TextOverlayBox({
         className="pointer-events-auto relative cursor-move"
         style={{
           ...textCss(overlay.style, frameRect.height),
-          // Percentages here would resolve against the text block's own
-          // width, which varies with the words. The frame is the thing
-          // offsets are relative to, so they are converted against its
-          // measured box instead.
-          transform: `translate(${overlay.offsetX * frameRect.width}px, ${
+          // The frame is the reference for offsets, so pixel values come from
+          // the frame's measured box. The calc() term shifts the anchor so
+          // left-aligned text grows rightward and right-aligned grows leftward.
+          transform: `translate(calc(${alignShift} + ${overlay.offsetX * frameRect.width}px), ${
             overlay.offsetY * frameRect.height
           }px)`,
           maxWidth: "92%",

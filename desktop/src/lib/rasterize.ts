@@ -13,7 +13,7 @@
  * an identity transform.
  */
 
-import type { TextStyle } from "./text";
+import { alignedCenterX, type TextStyle } from "./text";
 
 /** Mirrors `textCss`'s shadow: offset 4% of the size, blur 12%. */
 const SHADOW = { offset: 0.04, blur: 0.12, color: "rgba(0,0,0,0.55)" };
@@ -59,7 +59,7 @@ export async function rasterizeTitle(
   const blockWidth = Math.max(...lines.map((line) => context.measureText(line).width), 1);
   const blockHeight = lines.length * lineHeight;
 
-  const centerX = width / 2 + offsetX * width;
+  const centerX = alignedCenterX(style.align, offsetX, width, blockWidth);
   const centerY = height / 2 + offsetY * height;
 
   context.globalAlpha = style.opacity;
