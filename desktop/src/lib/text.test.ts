@@ -11,7 +11,7 @@
  */
 import { describe, expect, test } from "vitest";
 
-import { familyForPath } from "./text";
+import { alignedCenterX, familyForPath } from "./text";
 
 describe("familyForPath", () => {
   test("the file's own name, without its extension", () => {
@@ -38,5 +38,55 @@ describe("familyForPath", () => {
   test("a name with nothing usable left falls back, and still uniques", () => {
     expect(familyForPath("/f/★.otf", [])).toBe("Custom font");
     expect(familyForPath("/f/★.otf", ["Custom font"])).toBe("Custom font 2");
+  });
+});
+
+describe("alignedCenterX", () => {
+  const FRAME = 1920;
+  const BLOCK = 400;
+
+  test("center alignment: block centre sits at frame centre + offset", () => {
+    expect(alignedCenterX("center", 0, FRAME, BLOCK)).toBe(FRAME / 2);
+    expect(alignedCenterX("center", 0.1, FRAME, BLOCK)).toBe(FRAME / 2 + 0.1 * FRAME);
+  });
+
+  test("left alignment: block left edge sits at anchor, centre shifts right", () => {
+    const cx = alignedCenterX("left", 0, FRAME, BLOCK);
+    const leftEdge = cx - BLOCK / 2;
+    expect(leftEdge).toBe(FRAME / 2);
+  });
+
+  test("left alignment with offset: left edge tracks the anchor", () => {
+    const cx = alignedCenterX("left", -0.5, FRAME, BLOCK);
+    const leftEdge = cx - BLOCK / 2;
+    expect(leftEdge).toBe(0);
+  });
+
+  test("right alignment: block right edge sits at anchor, centre shifts left", () => {
+    const cx = alignedCenterX("right", 0, FRAME, BLOCK);
+    const rightEdge = cx + BLOCK / 2;
+    expect(rightEdge).toBe(FRAME / 2);
+  });
+
+  test("right alignment with offset: right edge tracks the anchor", () => {
+    const cx = alignedCenterX("right", 0.5, FRAME, BLOCK);
+    const rightEdge = cx + BLOCK / 2;
+    expect(rightEdge).toBe(FRAME);
+  });
+
+  test("left and right are symmetric about center", () => {
+    const offset = 0.15;
+    const anchor = FRAME / 2 + offset * FRAME;
+    const leftCx = alignedCenterX("left", offset, FRAME, BLOCK);
+    const rightCx = alignedCenterX("right", offset, FRAME, BLOCK);
+
+    expect(leftCx - anchor).toBe(BLOCK / 2);
+    expect(anchor - rightCx).toBe(BLOCK / 2);
+  });
+
+  test("wider text pushes the centre further from the anchor", () => {
+    const narrow = alignedCenterX("left", 0, FRAME, 200);
+    const wide = alignedCenterX("left", 0, FRAME, 600);
+    expect(wide - narrow).toBe(200);
   });
 });
